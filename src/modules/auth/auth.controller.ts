@@ -2,7 +2,6 @@ import { Controller, Post, Body, UseGuards, Request, Get, Response, Unauthorized
 import { Response as ExpressResponse } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RefreshJwtAuthGuard } from './guards/refresh-jwt-auth.guard';
@@ -59,13 +58,6 @@ export class AuthController {
     }
     
     return this.authService.refreshToken(refreshToken);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    const { password: _, ...userWithoutPassword } = req.user;
-    return userWithoutPassword;
   }
 
   @Post('logout')

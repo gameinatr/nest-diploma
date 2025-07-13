@@ -6,6 +6,7 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { DatabaseModule } from "./modules/database/database.module";
 import { AuthModule } from "./modules/auth/auth.module";
+import { UsersModule } from "./modules/users/users.module";
 import { ProductsModule } from "./modules/products/products.module";
 import { CartModule } from "./modules/cart/cart.module";
 import { CategoriesModule } from "./modules/categories/categories.module";
@@ -38,6 +39,7 @@ import { OrderItem } from "./modules/orders/entities/order-item.entity";
     }),
     DatabaseModule,
     AuthModule,
+    UsersModule,
     ProductsModule,
     CartModule,
     CategoriesModule,

@@ -1,51 +1,29 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { User } from './entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<{ user: Partial<User>; access_token: string; refresh_token: string }> {
-    const { email, password, firstName, lastName, role } = registerDto;
-
-    // Check if user already exists
-    const existingUser = await this.userRepository.findOne({ where: { email } });
-    if (existingUser) {
-      throw new ConflictException('User with this email already exists');
-    }
-
-    // Hash password
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Create user
-    const user = this.userRepository.create({
-      email,
-      password: hashedPassword,
-      firstName,
-      lastName,
-      role,
-    });
-
-    const savedUser = await this.userRepository.save(user);
+    // Create user using users service
+    const userWithoutPassword = await this.usersService.create(registerDto);
+    
+    // Get full user for token generation
+    const fullUser = await this.usersService.findById(userWithoutPassword.id);
 
     // Generate tokens
-    const tokens = this.generateTokens(savedUser);
-
-    // Return user without password
-    const { password: _, ...userWithoutPassword } = savedUser;
+    const tokens = this.generateTokens(fullUser);
 
     return {
       user: userWithoutPassword,
@@ -109,7 +87,7 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.usersService.findByEmail(email);
     if (user && await bcrypt.compare(password, user.password)) {
       return user;
     }
@@ -117,10 +95,10 @@ export class AuthService {
   }
 
   async findUserById(id: number): Promise<User | null> {
-    return this.userRepository.findOne({ where: { id } });
+    return this.usersService.findById(id);
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { email } });
+    return this.usersService.findByEmail(email);
   }
 }
