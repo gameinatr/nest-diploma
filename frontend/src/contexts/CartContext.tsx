@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Cart, CartItem, apiClient } from '@/lib/api';
-import { useAuth } from './AuthContext';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { Cart, CartItem, apiClient } from "@/lib/api";
+import { useAuth } from "./AuthContext";
 
 interface CartContextType {
   cart: Cart | null;
@@ -32,13 +32,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const refreshCart = async () => {
     if (!user) return;
-    
+
     try {
       setLoading(true);
       const cartData = await apiClient.getCart();
       setCart(cartData);
     } catch (error) {
-      console.error('Failed to fetch cart:', error);
+      console.error("Failed to fetch cart:", error);
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       await apiClient.addToCart({ productId, quantity });
       await refreshCart();
     } catch (error) {
-      console.error('Failed to add to cart:', error);
+      console.error("Failed to add to cart:", error);
       throw error;
     }
   };
@@ -59,7 +59,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       await apiClient.updateCartItem(itemId, { quantity });
       await refreshCart();
     } catch (error) {
-      console.error('Failed to update cart item:', error);
+      console.error("Failed to update cart item:", error);
       throw error;
     }
   };
@@ -69,7 +69,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       await apiClient.removeFromCart(itemId);
       await refreshCart();
     } catch (error) {
-      console.error('Failed to remove from cart:', error);
+      console.error("Failed to remove from cart:", error);
       throw error;
     }
   };
@@ -79,13 +79,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       await apiClient.clearCart();
       await refreshCart();
     } catch (error) {
-      console.error('Failed to clear cart:', error);
+      console.error("Failed to clear cart:", error);
       throw error;
     }
   };
 
   const getCartItemsCount = () => {
     if (!cart) return 0;
+    console.log({ cart });
     return cart.items.reduce((total, item) => total + item.quantity, 0);
   };
 
@@ -110,7 +111,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 export function useCart() {
   const context = useContext(CartContext);
   if (context === undefined) {
-    throw new Error('useCart must be used within a CartProvider');
+    throw new Error("useCart must be used within a CartProvider");
   }
   return context;
 }

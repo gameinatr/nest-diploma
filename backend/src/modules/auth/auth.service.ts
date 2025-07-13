@@ -36,22 +36,36 @@ export class AuthService {
     };
   }
 
-  async login(user: User): Promise<{
+  async login(loginDto: LoginDto): Promise<{
     user: Partial<User>;
     access_token: string;
     refresh_token: string;
   }> {
-    // Generate tokens
-    const tokens = this.generateTokens(user);
+    try {
+      // Generate tokens
+      const user = await this.usersService.findByEmail(loginDto.email);
+      const isPasswordCorrect = await this.usersService.verifyPassword(
+        user,
+        loginDto.password
+      );
 
-    // Return user without password
-    const { password: _, ...userWithoutPassword } = user;
+      if (!isPasswordCorrect) {
+        throw new UnauthorizedException("Invalid credentials");
+      }
 
-    return {
-      user: userWithoutPassword,
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token,
-    };
+      const tokens = this.generateTokens(user);
+
+      // Return user without password
+      const { password: _, ...userWithoutPassword } = user;
+
+      return {
+        user: userWithoutPassword,
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+      };
+    } catch (error) {
+      throw new UnauthorizedException("Login failed due to unknown reason");
+    }
   }
 
   async refreshToken(refreshToken: string): Promise<{ access_token: string }> {

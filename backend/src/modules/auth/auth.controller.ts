@@ -2,9 +2,8 @@ import { Controller, Post, Body, UseGuards, Request, Get, Response, Unauthorized
 import { Response as ExpressResponse } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
-import { LocalAuthGuard } from './guards/local-auth.guard';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RefreshJwtAuthGuard } from './guards/refresh-jwt-auth.guard';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -29,10 +28,9 @@ export class AuthController {
     });
   }
 
-  @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req, @Response() res: ExpressResponse) {
-    const result = await this.authService.login(req.user);
+  async login(@Request() req, @Body() loginDto: LoginDto, @Response() res: ExpressResponse) {
+    const result = await this.authService.login(loginDto);
     
     // Set refresh token as HTTP-only cookie
     res.cookie('refresh_token', result.refresh_token, {
@@ -44,7 +42,6 @@ export class AuthController {
 
     // Return response without refresh token in body
     return res.json({
-      user: result.user,
       access_token: result.access_token,
     });
   }

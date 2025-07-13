@@ -1,27 +1,34 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import * as bcrypt from 'bcryptjs';
-import { User } from '../auth/entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { QueryUserDto } from './dto/query-user.dto';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import * as bcrypt from "bcryptjs";
+import { User } from "../auth/entities/user.entity";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
+import { ChangePasswordDto } from "./dto/change-password.dto";
+import { QueryUserDto } from "./dto/query-user.dto";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private userRepository: Repository<User>
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<Partial<User>> {
     const { email, password, ...userData } = createUserDto;
 
     // Check if user already exists
-    const existingUser = await this.userRepository.findOne({ where: { email } });
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      throw new ConflictException("User with this email already exists");
     }
 
     // Hash password
@@ -48,29 +55,24 @@ export class UsersService {
     page: number;
     limit: number;
   }> {
-    const {
-      search,
-      role,
-      page = 1,
-      limit = 10,
-    } = queryDto;
+    const { search, role, page = 1, limit = 10 } = queryDto;
 
-    const queryBuilder = this.userRepository.createQueryBuilder('user');
+    const queryBuilder = this.userRepository.createQueryBuilder("user");
 
     // Apply filters
     if (search) {
       queryBuilder.andWhere(
-        '(user.email ILIKE :search OR user.firstName ILIKE :search OR user.lastName ILIKE :search)',
+        "(user.email ILIKE :search OR user.firstName ILIKE :search OR user.lastName ILIKE :search)",
         { search: `%${search}%` }
       );
     }
 
     if (role) {
-      queryBuilder.andWhere('user.role = :role', { role });
+      queryBuilder.andWhere("user.role = :role", { role });
     }
 
     // Apply sorting
-    queryBuilder.orderBy('user.createdAt', 'DESC');
+    queryBuilder.orderBy("user.createdAt", "DESC");
 
     // Apply pagination
     const skip = (page - 1) * limit;
@@ -79,7 +81,7 @@ export class UsersService {
     const [users, total] = await queryBuilder.getManyAndCount();
 
     // Remove passwords from response
-    const usersWithoutPasswords = users.map(user => {
+    const usersWithoutPasswords = users.map((user) => {
       const { password, ...userWithoutPassword } = user;
       return userWithoutPassword;
     });
@@ -110,7 +112,10 @@ export class UsersService {
     return this.userRepository.findOne({ where: { id } });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<Partial<User>> {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto
+  ): Promise<Partial<User>> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -118,9 +123,11 @@ export class UsersService {
 
     // Check if email is being changed and if it already exists
     if (updateUserDto.email && updateUserDto.email !== user.email) {
-      const existingUser = await this.userRepository.findOne({ where: { email: updateUserDto.email } });
+      const existingUser = await this.userRepository.findOne({
+        where: { email: updateUserDto.email },
+      });
       if (existingUser) {
-        throw new ConflictException('User with this email already exists');
+        throw new ConflictException("User with this email already exists");
       }
     }
 
@@ -131,7 +138,14 @@ export class UsersService {
     return userWithoutPassword;
   }
 
-  async changePassword(id: number, changePasswordDto: ChangePasswordDto): Promise<void> {
+  async verifyPassword(user: User, password: string): Promise<boolean> {
+    return await bcrypt.compare(password, user.password);
+  }
+
+  async changePassword(
+    id: number,
+    changePasswordDto: ChangePasswordDto
+  ): Promise<void> {
     const { currentPassword, newPassword } = changePasswordDto;
 
     const user = await this.userRepository.findOne({ where: { id } });
@@ -140,9 +154,12 @@ export class UsersService {
     }
 
     // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isCurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
     if (!isCurrentPasswordValid) {
-      throw new BadRequestException('Current password is incorrect');
+      throw new BadRequestException("Current password is incorrect");
     }
 
     // Hash new password

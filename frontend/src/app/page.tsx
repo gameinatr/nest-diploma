@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Product, apiClient } from '@/lib/api';
-import { useCart } from '@/contexts/CartContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Product, apiClient } from "@/lib/api";
+import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -21,10 +21,11 @@ export default function Home() {
     try {
       setLoading(true);
       const response = await apiClient.getProducts({ limit: 20 });
-      setProducts(response.data);
+      console.log({ response });
+      setProducts(response.products);
     } catch (err) {
-      setError('Failed to fetch products');
-      console.error('Error fetching products:', err);
+      setError("Failed to fetch products");
+      console.error("Error fetching products:", err);
     } finally {
       setLoading(false);
     }
@@ -32,16 +33,16 @@ export default function Home() {
 
   const handleAddToCart = async (productId: number) => {
     if (!user) {
-      alert('Please login to add items to cart');
+      alert("Please login to add items to cart");
       return;
     }
 
     try {
       await addToCart(productId, 1);
-      alert('Product added to cart!');
+      alert("Product added to cart!");
     } catch (error) {
-      alert('Failed to add product to cart');
-      console.error('Error adding to cart:', error);
+      alert("Failed to add product to cart");
+      console.error("Error adding to cart:", error);
     }
   };
 
@@ -73,7 +74,7 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-8">Products</h1>
-      
+
       {products.length === 0 ? (
         <div className="text-center py-16">
           <div className="max-w-md mx-auto">
@@ -92,9 +93,12 @@ export default function Home() {
                 />
               </svg>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">No products available</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              No products available
+            </h2>
             <p className="text-gray-600 mb-6">
-              There are currently no products in our store. Please check back later!
+              There are currently no products in our store. Please check back
+              later!
             </p>
             <button
               onClick={fetchProducts}
@@ -107,7 +111,10 @@ export default function Home() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.map((product) => (
-            <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div
+              key={product.id}
+              className="bg-white rounded-lg shadow-md overflow-hidden"
+            >
               <div className="h-48 bg-gray-200 flex items-center justify-center">
                 {product.image ? (
                   <img
