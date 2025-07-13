@@ -1,24 +1,28 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcryptjs';
-import { User } from './entities/user.entity';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import { UsersService } from '../users/users.service';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
+import * as bcrypt from "bcryptjs";
+import { User } from "./entities/user.entity";
+import { RegisterDto } from "./dto/register.dto";
+import { LoginDto } from "./dto/login.dto";
+import { UsersService } from "../users/users.service";
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private configService: ConfigService,
+    private configService: ConfigService
   ) {}
 
-  async register(registerDto: RegisterDto): Promise<{ user: Partial<User>; access_token: string; refresh_token: string }> {
+  async register(registerDto: RegisterDto): Promise<{
+    user: Partial<User>;
+    access_token: string;
+    refresh_token: string;
+  }> {
     // Create user using users service
     const userWithoutPassword = await this.usersService.create(registerDto);
-    
+
     // Get full user for token generation
     const fullUser = await this.usersService.findById(userWithoutPassword.id);
 
@@ -32,7 +36,11 @@ export class AuthService {
     };
   }
 
-  async login(user: User): Promise<{ user: Partial<User>; access_token: string; refresh_token: string }> {
+  async login(user: User): Promise<{
+    user: Partial<User>;
+    access_token: string;
+    refresh_token: string;
+  }> {
     // Generate tokens
     const tokens = this.generateTokens(user);
 
@@ -49,38 +57,41 @@ export class AuthService {
   async refreshToken(refreshToken: string): Promise<{ access_token: string }> {
     try {
       const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        secret: this.configService.get<string>("JWT_REFRESH_SECRET"),
       });
 
       const user = await this.findUserById(payload.sub);
       if (!user) {
-        throw new UnauthorizedException('Invalid refresh token');
+        throw new UnauthorizedException("Invalid refresh token");
       }
 
       // Generate new access token
       const accessTokenPayload = { email: user.email, sub: user.id };
       const access_token = this.jwtService.sign(accessTokenPayload, {
-        secret: this.configService.get<string>('JWT_SECRET'),
-        expiresIn: '15m',
+        secret: this.configService.get<string>("JWT_SECRET"),
+        expiresIn: "15m",
       });
 
       return { access_token };
     } catch (error) {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException("Invalid refresh token");
     }
   }
 
-  private generateTokens(user: User): { access_token: string; refresh_token: string } {
+  private generateTokens(user: User): {
+    access_token: string;
+    refresh_token: string;
+  } {
     const payload = { email: user.email, sub: user.id };
 
     const access_token = this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_SECRET'),
-      expiresIn: '15m',
+      secret: this.configService.get<string>("JWT_SECRET"),
+      expiresIn: "15m",
     });
 
     const refresh_token = this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      expiresIn: '7d',
+      secret: this.configService.get<string>("JWT_REFRESH_SECRET"),
+      expiresIn: "7d",
     });
 
     return { access_token, refresh_token };
@@ -88,7 +99,7 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.usersService.findByEmail(email);
-    if (user && await bcrypt.compare(password, user.password)) {
+    if (user && (await bcrypt.compare(password, user.password))) {
       return user;
     }
     return null;

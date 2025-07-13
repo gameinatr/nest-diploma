@@ -4,7 +4,6 @@ import { ConfigModule } from "@nestjs/config";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { DatabaseModule } from "./modules/database/database.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { UsersModule } from "./modules/users/users.module";
 import { ProductsModule } from "./modules/products/products.module";
@@ -18,26 +17,20 @@ import { CartItem } from "./modules/cart/entities/cart-item.entity";
 import { Category } from "./modules/categories/entities/category.entity";
 import { Order } from "./modules/orders/entities/order.entity";
 import { OrderItem } from "./modules/orders/entities/order-item.entity";
-
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.POSTGRESQL_ADDON_HOST,
-      port: parseInt(process.env.POSTGRESQL_ADDON_PORT, 10),
-      username: process.env.POSTGRESQL_ADDON_USER,
-      password: process.env.POSTGRESQL_ADDON_PASSWORD,
-      database: process.env.POSTGRESQL_ADDON_DB,
+      type: "postgres",
+      url: 'postgresql://diploma_postgres_user:NTA5DzzxBSZoP48IaxlWuyaO2799xwMB@dpg-d1pra4s9c44c738u6ad0-a.frankfurt-postgres.render.com/diploma_postgres', //process.env.POSTGRESQL_URL,
       entities: [User, Product, Cart, CartItem, Category, Order, OrderItem],
       synchronize: true, // Set to false in production
       ssl: {
         rejectUnauthorized: false, // For cloud databases
       },
     }),
-    DatabaseModule,
     AuthModule,
     UsersModule,
     ProductsModule,
@@ -48,4 +41,8 @@ import { OrderItem } from "./modules/orders/entities/order-item.entity";
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  onModuleInit() {
+    console.log("Application initialized");
+  }
+}
