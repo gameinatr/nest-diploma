@@ -9,11 +9,14 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { ProductsModule } from "./modules/products/products.module";
 import { CartModule } from "./modules/cart/cart.module";
 import { CategoriesModule } from "./modules/categories/categories.module";
+import { OrdersModule } from "./modules/orders/orders.module";
 import { User } from "./modules/auth/entities/user.entity";
 import { Product } from "./modules/products/entities/product.entity";
 import { Cart } from "./modules/cart/entities/cart.entity";
 import { CartItem } from "./modules/cart/entities/cart-item.entity";
 import { Category } from "./modules/categories/entities/category.entity";
+import { Order } from "./modules/orders/entities/order.entity";
+import { OrderItem } from "./modules/orders/entities/order-item.entity";
 
 @Module({
   imports: [
@@ -27,7 +30,7 @@ import { Category } from "./modules/categories/entities/category.entity";
       username: process.env.POSTGRESQL_ADDON_USER,
       password: process.env.POSTGRESQL_ADDON_PASSWORD,
       database: process.env.POSTGRESQL_ADDON_DB,
-      entities: [User, Product, Cart, CartItem, Category],
+      entities: [User, Product, Cart, CartItem, Category, Order, OrderItem],
       synchronize: true, // Set to false in production
       ssl: {
         rejectUnauthorized: false, // For cloud databases
@@ -38,6 +41,7 @@ import { Category } from "./modules/categories/entities/category.entity";
     ProductsModule,
     CartModule,
     CategoriesModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
