@@ -6,7 +6,9 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { DatabaseModule } from "./modules/database/database.module";
 import { AuthModule } from "./modules/auth/auth.module";
+import { ProductsModule } from "./modules/products/products.module";
 import { User } from "./modules/auth/entities/user.entity";
+import { Product } from "./modules/products/entities/product.entity";
 
 @Module({
   imports: [
@@ -20,7 +22,7 @@ import { User } from "./modules/auth/entities/user.entity";
       username: process.env.POSTGRESQL_ADDON_USER,
       password: process.env.POSTGRESQL_ADDON_PASSWORD,
       database: process.env.POSTGRESQL_ADDON_DB,
-      entities: [User],
+      entities: [User, Product],
       synchronize: true, // Set to false in production
       ssl: {
         rejectUnauthorized: false, // For cloud databases
@@ -28,6 +30,7 @@ import { User } from "./modules/auth/entities/user.entity";
     }),
     DatabaseModule,
     AuthModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
