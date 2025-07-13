@@ -7,8 +7,11 @@ import { AppService } from "./app.service";
 import { DatabaseModule } from "./modules/database/database.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { ProductsModule } from "./modules/products/products.module";
+import { CartModule } from "./modules/cart/cart.module";
 import { User } from "./modules/auth/entities/user.entity";
 import { Product } from "./modules/products/entities/product.entity";
+import { Cart } from "./modules/cart/entities/cart.entity";
+import { CartItem } from "./modules/cart/entities/cart-item.entity";
 
 @Module({
   imports: [
@@ -22,7 +25,7 @@ import { Product } from "./modules/products/entities/product.entity";
       username: process.env.POSTGRESQL_ADDON_USER,
       password: process.env.POSTGRESQL_ADDON_PASSWORD,
       database: process.env.POSTGRESQL_ADDON_DB,
-      entities: [User, Product],
+      entities: [User, Product, Cart, CartItem],
       synchronize: true, // Set to false in production
       ssl: {
         rejectUnauthorized: false, // For cloud databases
@@ -31,6 +34,7 @@ import { Product } from "./modules/products/entities/product.entity";
     DatabaseModule,
     AuthModule,
     ProductsModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [AppService],
