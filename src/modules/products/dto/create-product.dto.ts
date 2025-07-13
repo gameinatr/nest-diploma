@@ -10,11 +10,14 @@ export class CreateProductDto {
   @IsUrl()
   image?: string;
 
-  @IsString()
-  category: string;
+  @IsNumber()
+  @Type(() => Number)
+  categoryId: number;
 
-  @IsString()
-  subcategory: string;
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  subcategoryId?: number;
 
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)

@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, Between, FindManyOptions } from 'typeorm';
 import { Product } from './entities/product.entity';
+import { Category } from '../categories/entities/category.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto } from './dto/query-product.dto';
@@ -11,17 +12,40 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    const product = this.productRepository.create(createProductDto);
+    const { categoryId, subcategoryId, ...productData } = createProductDto;
+
+    // Validate category exists
+    const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${categoryId} not found`);
+    }
+
+    // Validate subcategory exists if provided
+    if (subcategoryId) {
+      const subcategory = await this.categoryRepository.findOne({ where: { id: subcategoryId } });
+      if (!subcategory) {
+        throw new NotFoundException(`Subcategory with ID ${subcategoryId} not found`);
+      }
+    }
+
+    const product = this.productRepository.create({
+      ...productData,
+      categoryId,
+      subcategoryId,
+    });
+    
     return this.productRepository.save(product);
   }
 
   async findAll(queryDto: QueryProductDto): Promise<{ products: Product[]; total: number; page: number; limit: number }> {
     const {
-      category,
-      subcategory,
+      categoryId,
+      subcategoryId,
       search,
       minPrice,
       maxPrice,
@@ -32,15 +56,17 @@ export class ProductsService {
       limit = 10,
     } = queryDto;
 
-    const queryBuilder = this.productRepository.createQueryBuilder('product');
+    const queryBuilder = this.productRepository.createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.subcategory', 'subcategory');
 
     // Apply filters
-    if (category) {
-      queryBuilder.andWhere('product.category = :category', { category });
+    if (categoryId) {
+      queryBuilder.andWhere('product.categoryId = :categoryId', { categoryId });
     }
 
-    if (subcategory) {
-      queryBuilder.andWhere('product.subcategory = :subcategory', { subcategory });
+    if (subcategoryId) {
+      queryBuilder.andWhere('product.subcategoryId = :subcategoryId', { subcategoryId });
     }
 
     if (search) {
@@ -83,7 +109,10 @@ export class ProductsService {
   }
 
   async findOne(id: number): Promise<Product> {
-    const product = await this.productRepository.findOne({ where: { id } });
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ['category', 'subcategory'],
+    });
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
@@ -92,34 +121,34 @@ export class ProductsService {
 
   async update(id: number, updateProductDto: UpdateProductDto): Promise<Product> {
     const product = await this.findOne(id);
-    Object.assign(product, updateProductDto);
+    const { categoryId, subcategoryId, ...updateData } = updateProductDto;
+
+    // Validate category exists if provided
+    if (categoryId !== undefined) {
+      const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
+      if (!category) {
+        throw new NotFoundException(`Category with ID ${categoryId} not found`);
+      }
+      product.categoryId = categoryId;
+    }
+
+    // Validate subcategory exists if provided
+    if (subcategoryId !== undefined) {
+      if (subcategoryId) {
+        const subcategory = await this.categoryRepository.findOne({ where: { id: subcategoryId } });
+        if (!subcategory) {
+          throw new NotFoundException(`Subcategory with ID ${subcategoryId} not found`);
+        }
+      }
+      product.subcategoryId = subcategoryId;
+    }
+
+    Object.assign(product, updateData);
     return this.productRepository.save(product);
   }
 
   async remove(id: number): Promise<void> {
     const product = await this.findOne(id);
     await this.productRepository.remove(product);
-  }
-
-  async getCategories(): Promise<string[]> {
-    const result = await this.productRepository
-      .createQueryBuilder('product')
-      .select('DISTINCT product.category', 'category')
-      .getRawMany();
-    
-    return result.map(item => item.category);
-  }
-
-  async getSubcategories(category?: string): Promise<string[]> {
-    const queryBuilder = this.productRepository
-      .createQueryBuilder('product')
-      .select('DISTINCT product.subcategory', 'subcategory');
-
-    if (category) {
-      queryBuilder.where('product.category = :category', { category });
-    }
-
-    const result = await queryBuilder.getRawMany();
-    return result.map(item => item.subcategory);
   }
 }

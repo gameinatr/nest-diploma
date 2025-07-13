@@ -3,12 +3,14 @@ import { Type } from 'class-transformer';
 
 export class QueryProductDto {
   @IsOptional()
-  @IsString()
-  category?: string;
+  @IsNumber()
+  @Type(() => Number)
+  categoryId?: number;
 
   @IsOptional()
-  @IsString()
-  subcategory?: string;
+  @IsNumber()
+  @Type(() => Number)
+  subcategoryId?: number;
 
   @IsOptional()
   @IsString()

@@ -31,16 +31,6 @@ export class ProductsController {
     return this.productsService.findAll(queryDto);
   }
 
-  @Get('categories')
-  getCategories() {
-    return this.productsService.getCategories();
-  }
-
-  @Get('subcategories')
-  getSubcategories(@Query('category') category?: string) {
-    return this.productsService.getSubcategories(category);
-  }
-
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.findOne(id);
