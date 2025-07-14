@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import AdminGuard from '@/components/AdminGuard';
-import { apiClient, Order } from '@/lib/api';
-import Link from 'next/link';
-import { formatCurrency } from '@/lib/utils';
+import { useState, useEffect } from "react";
+import AdminGuard from "@/components/AdminGuard";
+import { apiClient, Order } from "@/lib/api";
+import Link from "next/link";
+import { formatCurrency } from "@/lib/utils";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -13,17 +13,12 @@ export default function AdminOrders() {
   const [showForm, setShowForm] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [formData, setFormData] = useState({
-    status: '',
-    shippingAddress: '',
-    notes: '',
+    status: "",
+    shippingAddress: "",
+    notes: "",
   });
 
-  const orderStatuses = [
-    'pending',
-    'paid',
-    'shipped',
-    'cancelled',
-  ];
+  const orderStatuses = ["pending", "paid", "shipped", "cancelled"];
 
   useEffect(() => {
     loadOrders();
@@ -35,7 +30,7 @@ export default function AdminOrders() {
       const response = await apiClient.adminGetOrders({ limit: 100 });
       setOrders(response.orders);
     } catch (err) {
-      setError('Failed to load orders');
+      setError("Failed to load orders");
       console.error(err);
     } finally {
       setLoading(false);
@@ -59,7 +54,7 @@ export default function AdminOrders() {
       resetForm();
       loadOrders();
     } catch (err) {
-      setError('Failed to update order');
+      setError("Failed to update order");
       console.error(err);
     }
   };
@@ -69,18 +64,18 @@ export default function AdminOrders() {
     setFormData({
       status: order.status,
       shippingAddress: order.shippingAddress,
-      notes: order.notes || '',
+      notes: order.notes || "",
     });
     setShowForm(true);
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('Are you sure you want to delete this order?')) {
+    if (confirm("Are you sure you want to delete this order?")) {
       try {
         await apiClient.adminDeleteOrder(id);
         loadOrders();
       } catch (err) {
-        setError('Failed to delete order');
+        setError("Failed to delete order");
         console.error(err);
       }
     }
@@ -88,9 +83,9 @@ export default function AdminOrders() {
 
   const resetForm = () => {
     setFormData({
-      status: '',
-      shippingAddress: '',
-      notes: '',
+      status: "",
+      shippingAddress: "",
+      notes: "",
     });
   };
 
@@ -102,16 +97,16 @@ export default function AdminOrders() {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'paid':
-        return 'bg-blue-100 text-blue-800';
-      case 'shipped':
-        return 'bg-green-100 text-green-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "paid":
+        return "bg-blue-100 text-blue-800";
+      case "shipped":
+        return "bg-green-100 text-green-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -132,8 +127,13 @@ export default function AdminOrders() {
           <div className="px-4 py-6 sm:px-0">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Orders Management</h1>
-                <Link href="/admin" className="text-blue-600 hover:text-blue-800">
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Orders Management
+                </h1>
+                <Link
+                  href="/admin"
+                  className="text-blue-600 hover:text-blue-800"
+                >
                   ← Back to Dashboard
                 </Link>
               </div>
@@ -147,8 +147,13 @@ export default function AdminOrders() {
 
             {showForm && editingOrder && (
               <div className="bg-white shadow rounded-lg p-6 mb-6">
-                <h2 className="text-xl font-bold mb-4">Edit Order #{editingOrder.id}</h2>
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h2 className="text-xl font-bold mb-4">
+                  Edit Order #{editingOrder.id}
+                </h2>
+                <form
+                  onSubmit={handleSubmit}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                >
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Status *
@@ -156,7 +161,9 @@ export default function AdminOrders() {
                     <select
                       required
                       value={formData.status}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, status: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                     >
                       {orderStatuses.map((status) => (
@@ -175,7 +182,12 @@ export default function AdminOrders() {
                       type="text"
                       required
                       value={formData.shippingAddress}
-                      onChange={(e) => setFormData({ ...formData, shippingAddress: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          shippingAddress: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
@@ -187,7 +199,9 @@ export default function AdminOrders() {
                     <textarea
                       rows={3}
                       value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, notes: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
@@ -240,16 +254,27 @@ export default function AdminOrders() {
                     <tr key={order.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">#{order.id}</div>
-                          <div className="text-sm text-gray-500">{order.items.length} items</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            #{order.id}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {order.items.length} items
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">User ID: {order.userId}</div>
+                        <div className="text-sm text-gray-900">
+                          User ID: {order.userId}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                            order.status
+                          )}`}
+                        >
+                          {order.status.charAt(0).toUpperCase() +
+                            order.status.slice(1)}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -276,7 +301,7 @@ export default function AdminOrders() {
                   ))}
                 </tbody>
               </table>
-              
+
               {orders.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-gray-500">No orders found.</p>
@@ -287,9 +312,13 @@ export default function AdminOrders() {
             {/* Order Details Modal/Expandable Section */}
             {orders.length > 0 && (
               <div className="mt-6 bg-white shadow rounded-lg p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Order Details</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Order Details
+                </h3>
                 <p className="text-sm text-gray-600">
-                  Click "Edit" on any order to view and modify its details. Order items, shipping address, and status can be updated.
+                  Click &quot;Edit&quot; on any order to view and modify its
+                  details. Order items, shipping address, and status can be
+                  updated.
                 </p>
               </div>
             )}
