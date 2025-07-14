@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext';
-import { Order, apiClient } from '@/lib/api';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
+import { Order, apiClient } from "@/lib/api";
+import { formatCurrency } from "@/lib/utils";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -15,7 +16,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!user) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
     fetchOrders();
@@ -25,10 +26,11 @@ export default function ProfilePage() {
     try {
       setLoading(true);
       const response = await apiClient.getOrders({ limit: 10 });
-      setOrders(response.data);
+      console.log({ response });
+      setOrders(response.orders);
     } catch (err) {
-      setError('Failed to fetch orders');
-      console.error('Error fetching orders:', err);
+      setError("Failed to fetch orders");
+      console.error("Error fetching orders:", err);
     } finally {
       setLoading(false);
     }
@@ -49,19 +51,27 @@ export default function ProfilePage() {
             <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">First Name</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  First Name
+                </label>
                 <p className="mt-1 text-gray-900">{user.firstName}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Last Name
+                </label>
                 <p className="mt-1 text-gray-900">{user.lastName}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
                 <p className="mt-1 text-gray-900">{user.email}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Member Since</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Member Since
+                </label>
                 <p className="mt-1 text-gray-900">
                   {new Date(user.createdAt).toLocaleDateString()}
                 </p>
@@ -76,7 +86,7 @@ export default function ProfilePage() {
             <div className="p-6 border-b">
               <h2 className="text-xl font-semibold">My Orders</h2>
             </div>
-            
+
             {loading ? (
               <div className="p-6 text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
@@ -109,9 +119,12 @@ export default function ProfilePage() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No orders yet
+                </h3>
                 <p className="text-gray-600 mb-4">
-                  You haven't placed any orders yet. Start shopping to see your orders here!
+                  You haven&apos;t placed any orders yet. Start shopping to see your
+                  orders here!
                 </p>
                 <Link
                   href="/"
@@ -130,34 +143,38 @@ export default function ProfilePage() {
                           Order #{order.id}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          Placed on {new Date(order.createdAt).toLocaleDateString()}
+                          Placed on{" "}
+                          {new Date(order.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-gray-900">
-                          ${order.totalAmount.toFixed(2)}
+                          {formatCurrency(order.totalAmount)}
                         </p>
                         <span
                           className={`inline-block px-2 py-1 text-xs rounded-full ${
-                            order.status === 'pending'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : order.status === 'processing'
-                              ? 'bg-blue-100 text-blue-800'
-                              : order.status === 'shipped'
-                              ? 'bg-purple-100 text-purple-800'
-                              : order.status === 'delivered'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-100 text-gray-800'
+                            order.status === "pending"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : order.status === "processing"
+                              ? "bg-blue-100 text-blue-800"
+                              : order.status === "shipped"
+                              ? "bg-purple-100 text-purple-800"
+                              : order.status === "delivered"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
                           }`}
                         >
                           {order.status}
                         </span>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2 mb-4">
                       {order.items.map((item) => (
-                        <div key={item.id} className="flex items-center space-x-3">
+                        <div
+                          key={item.id}
+                          className="flex items-center space-x-3"
+                        >
                           <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
                             {item.product.image ? (
                               <img
@@ -186,7 +203,8 @@ export default function ProfilePage() {
                               {item.product.title}
                             </p>
                             <p className="text-xs text-gray-600">
-                              Qty: {item.quantity} × ${item.price.toFixed(2)}
+                              Qty: {item.quantity} ×{" "}
+                              {formatCurrency(item.price)}
                             </p>
                           </div>
                         </div>

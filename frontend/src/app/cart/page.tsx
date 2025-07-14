@@ -1,20 +1,22 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useCart } from '@/contexts/CartContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { formatCurrency, toNumber } from "@/lib/utils";
 
 export default function CartPage() {
-  const { cart, loading, updateCartItem, removeFromCart, clearCart } = useCart();
+  const { cart, loading, updateCartItem, removeFromCart, clearCart } =
+    useCart();
   const { user } = useAuth();
   const router = useRouter();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   useEffect(() => {
     if (!user) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [user, router]);
 
@@ -23,7 +25,8 @@ export default function CartPage() {
     try {
       await updateCartItem(itemId, newQuantity);
     } catch (error) {
-      alert('Failed to update quantity');
+      console.warn({ error });
+      alert("Failed to update quantity");
     }
   };
 
@@ -31,23 +34,25 @@ export default function CartPage() {
     try {
       await removeFromCart(itemId);
     } catch (error) {
-      alert('Failed to remove item');
+      console.warn({ error });
+      alert("Failed to remove item");
     }
   };
 
   const handleClearCart = async () => {
-    if (confirm('Are you sure you want to clear your cart?')) {
+    if (confirm("Are you sure you want to clear your cart?")) {
       try {
         await clearCart();
       } catch (error) {
-        alert('Failed to clear cart');
+        console.warn({ error });
+        alert("Failed to clear cart");
       }
     }
   };
 
   const handleCheckout = () => {
     setIsCheckingOut(true);
-    router.push('/checkout');
+    router.push("/checkout");
   };
 
   if (!user) {
@@ -84,7 +89,9 @@ export default function CartPage() {
                 />
               </svg>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Your cart is empty</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Your cart is empty
+            </h2>
             <p className="text-gray-600 mb-6">
               Add some products to your cart to get started!
             </p>
@@ -114,7 +121,10 @@ export default function CartPage() {
               </div>
               <div className="divide-y">
                 {cart.items.map((item) => (
-                  <div key={item.id} className="p-6 flex items-center space-x-4">
+                  <div
+                    key={item.id}
+                    className="p-6 flex items-center space-x-4"
+                  >
                     <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
                       {item.product.image ? (
                         <img
@@ -139,19 +149,27 @@ export default function CartPage() {
                       )}
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{item.product.title}</h3>
-                      <p className="text-gray-600 text-sm">${item.product.price.toFixed(2)} each</p>
+                      <h3 className="font-semibold text-gray-900">
+                        {item.product.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm">
+                        {formatCurrency(item.product.price)} each
+                      </p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                        onClick={() =>
+                          handleQuantityChange(item.id, item.quantity - 1)
+                        }
                         className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
                       >
                         -
                       </button>
                       <span className="w-8 text-center">{item.quantity}</span>
                       <button
-                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                        onClick={() =>
+                          handleQuantityChange(item.id, item.quantity + 1)
+                        }
                         className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center"
                       >
                         +
@@ -159,7 +177,9 @@ export default function CartPage() {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold">
-                        ${(item.product.price * item.quantity).toFixed(2)}
+                        {formatCurrency(
+                          toNumber(item.product.price) * item.quantity
+                        )}
                       </p>
                       <button
                         onClick={() => handleRemoveItem(item.id)}
@@ -181,7 +201,7 @@ export default function CartPage() {
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>${cart.totalAmount.toFixed(2)}</span>
+                  <span>{formatCurrency(cart.totalAmount)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
@@ -190,7 +210,7 @@ export default function CartPage() {
                 <div className="border-t pt-2">
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
-                    <span>${cart.totalAmount.toFixed(2)}</span>
+                    <span>{formatCurrency(cart.totalAmount)}</span>
                   </div>
                 </div>
               </div>
@@ -199,7 +219,7 @@ export default function CartPage() {
                 disabled={isCheckingOut}
                 className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white py-3 rounded-lg font-medium"
               >
-                {isCheckingOut ? 'Processing...' : 'Proceed to Checkout'}
+                {isCheckingOut ? "Processing..." : "Proceed to Checkout"}
               </button>
               <Link
                 href="/"

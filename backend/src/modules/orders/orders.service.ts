@@ -8,6 +8,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { QueryOrderDto } from './dto/query-order.dto';
 import { OrderStatus } from './enums/order-status.enum';
+import { convertOrderAmounts, convertOrderItemPrices, convertProductPrices } from '../../common/utils/number-converter.util';
 
 @Injectable()
 export class OrdersService {
@@ -45,7 +46,7 @@ export class OrdersService {
         orderId: savedOrder.id,
         productId: cartItem.product.id,
         quantity: cartItem.quantity,
-        price: parseFloat(cartItem.product.price.toString()),
+        price: Number(cartItem.product.price),
         productTitle: cartItem.product.title,
       })
     );
@@ -89,8 +90,17 @@ export class OrdersService {
 
     const [orders, total] = await queryBuilder.getManyAndCount();
 
+    // Convert decimal strings to numbers
+    const convertedOrders = orders.map(order => ({
+      ...convertOrderAmounts(order),
+      items: order.items.map(item => ({
+        ...convertOrderItemPrices(item),
+        product: item.product ? convertProductPrices(item.product) : item.product,
+      })),
+    }));
+
     return {
-      orders,
+      orders: convertedOrders,
       total,
       page,
       limit,
@@ -127,8 +137,17 @@ export class OrdersService {
 
     const [orders, total] = await queryBuilder.getManyAndCount();
 
+    // Convert decimal strings to numbers
+    const convertedOrders = orders.map(order => ({
+      ...convertOrderAmounts(order),
+      items: order.items.map(item => ({
+        ...convertOrderItemPrices(item),
+        product: item.product ? convertProductPrices(item.product) : item.product,
+      })),
+    }));
+
     return {
-      orders,
+      orders: convertedOrders,
       total,
       page,
       limit,
@@ -152,7 +171,16 @@ export class OrdersService {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
 
-    return order;
+    // Convert decimal strings to numbers
+    const convertedOrder = {
+      ...convertOrderAmounts(order),
+      items: order.items.map(item => ({
+        ...convertOrderItemPrices(item),
+        product: item.product ? convertProductPrices(item.product) : item.product,
+      })),
+    };
+
+    return convertedOrder;
   }
 
   async update(id: number, updateOrderDto: UpdateOrderDto, userId?: number): Promise<Order> {

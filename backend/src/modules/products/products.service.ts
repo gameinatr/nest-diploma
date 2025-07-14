@@ -6,6 +6,7 @@ import { Category } from '../categories/entities/category.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto } from './dto/query-product.dto';
+import { convertProductPrices } from '../../common/utils/number-converter.util';
 
 @Injectable()
 export class ProductsService {
@@ -100,8 +101,11 @@ export class ProductsService {
 
     const [products, total] = await queryBuilder.getManyAndCount();
 
+    // Convert decimal strings to numbers
+    const convertedProducts = products.map(convertProductPrices);
+
     return {
-      products,
+      products: convertedProducts,
       total,
       page,
       limit,
@@ -116,7 +120,7 @@ export class ProductsService {
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
-    return product;
+    return convertProductPrices(product);
   }
 
   async update(id: number, updateProductDto: UpdateProductDto): Promise<Product> {

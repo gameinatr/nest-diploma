@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiClient } from '@/lib/api';
+import { formatCurrency, toNumber } from '@/lib/utils';
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
@@ -148,7 +149,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="text-right">
                   <p className="font-medium">
-                    ${(item.product.price * item.quantity).toFixed(2)}
+                    {formatCurrency(toNumber(item.product.price) * item.quantity)}
                   </p>
                 </div>
               </div>
@@ -158,7 +159,7 @@ export default function CheckoutPage() {
           <div className="border-t pt-4 space-y-2">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>${cart.totalAmount.toFixed(2)}</span>
+              <span>{formatCurrency(cart.totalAmount)}</span>
             </div>
             <div className="flex justify-between">
               <span>Shipping</span>
@@ -171,7 +172,7 @@ export default function CheckoutPage() {
             <div className="border-t pt-2">
               <div className="flex justify-between font-semibold text-lg">
                 <span>Total</span>
-                <span>${cart.totalAmount.toFixed(2)}</span>
+                <span>{formatCurrency(cart.totalAmount)}</span>
               </div>
             </div>
           </div>

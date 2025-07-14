@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
+import { Role } from '@/lib/api';
 
 export default function Navigation() {
   const { user, logout } = useAuth();
@@ -59,6 +60,14 @@ export default function Navigation() {
                 >
                   Profile
                 </Link>
+                {user.role === Role.ADMIN && (
+                  <Link
+                    href="/admin"
+                    className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                  >
+                    Admin
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
                   className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium"

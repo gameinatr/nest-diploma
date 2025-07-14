@@ -6,6 +6,7 @@ import { CartItem } from './entities/cart-item.entity';
 import { Product } from '../products/entities/product.entity';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
+import { convertProductPrices } from '../../common/utils/number-converter.util';
 
 @Injectable()
 export class CartService {
@@ -40,14 +41,22 @@ export class CartService {
   }> {
     const cart = await this.getOrCreateCart(userId);
     
+    // Convert price strings to numbers for calculations
+    cart.items.forEach(item => {
+      item.product = convertProductPrices(item.product);
+    });
+    
     const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
     const totalPrice = cart.items.reduce(
-      (sum, item) => sum + (parseFloat(item.product.price.toString()) * item.quantity),
+      (sum, item) => sum + (item.product.price * item.quantity),
       0
     );
 
     return {
-      cart,
+      cart: {
+        ...cart,
+        totalAmount: Math.round(totalPrice * 100) / 100, // Round to 2 decimal places
+      },
       totalItems,
       totalPrice: Math.round(totalPrice * 100) / 100, // Round to 2 decimal places
     };

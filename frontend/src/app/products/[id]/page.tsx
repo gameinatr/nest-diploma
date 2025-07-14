@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Product, apiClient } from '@/lib/api';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { formatCurrency } from '@/lib/utils';
 
 export default function ProductPage() {
   const params = useParams();
@@ -132,7 +133,7 @@ export default function ProductPage() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">{product.title}</h1>
             <p className="text-2xl font-bold text-blue-600 mt-2">
-              ${product.price.toFixed(2)}
+              {formatCurrency(product.price)}
             </p>
           </div>
 

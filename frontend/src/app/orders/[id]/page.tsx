@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Order, apiClient } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { formatCurrency, toNumber } from '@/lib/utils';
 
 export default function OrderDetailsPage() {
   const params = useParams();
@@ -161,12 +162,12 @@ export default function OrderDetailsPage() {
                   <h3 className="font-medium text-gray-900">{item.product.title}</h3>
                   <p className="text-gray-600 text-sm">{item.product.description}</p>
                   <p className="text-gray-600 text-sm">
-                    ${item.price.toFixed(2)} × {item.quantity}
+                    {formatCurrency(item.price)} × {item.quantity}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="font-semibold text-gray-900">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    {formatCurrency(toNumber(item.price) * item.quantity)}
                   </p>
                 </div>
               </div>
@@ -180,7 +181,7 @@ export default function OrderDetailsPage() {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>${order.totalAmount.toFixed(2)}</span>
+              <span>{formatCurrency(order.totalAmount)}</span>
             </div>
             <div className="flex justify-between">
               <span>Shipping</span>
@@ -193,7 +194,7 @@ export default function OrderDetailsPage() {
             <div className="border-t pt-2">
               <div className="flex justify-between font-semibold text-lg">
                 <span>Total</span>
-                <span>${order.totalAmount.toFixed(2)}</span>
+                <span>{formatCurrency(order.totalAmount)}</span>
               </div>
             </div>
           </div>

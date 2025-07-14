@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Product, apiClient } from "@/lib/api";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { formatCurrency } from "@/lib/utils";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -21,7 +22,6 @@ export default function Home() {
     try {
       setLoading(true);
       const response = await apiClient.getProducts({ limit: 20 });
-      console.log({ response });
       setProducts(response.products);
     } catch (err) {
       setError("Failed to fetch products");
@@ -160,7 +160,7 @@ export default function Home() {
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-xl font-bold text-blue-600">
-                    ${product.price.toFixed(2)}
+                    {formatCurrency(product.price)}
                   </span>
                   {product.stock !== undefined && product.stock > 0 && (
                     <span className="text-sm text-green-600">
