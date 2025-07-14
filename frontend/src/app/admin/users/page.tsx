@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import AdminGuard from '@/components/AdminGuard';
-import { apiClient, User, Role } from '@/lib/api';
-import Link from 'next/link';
+import { useState, useEffect, useCallback } from "react";
+import AdminGuard from "@/components/AdminGuard";
+import { apiClient, User, Role } from "@/lib/api";
+import Link from "next/link";
 
 export default function AdminUsers() {
   const [users, setUsers] = useState<User[]>([]);
@@ -12,35 +12,36 @@ export default function AdminUsers() {
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
     role: Role.USER,
   });
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState<Role | ''>('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState<Role | "">("");
 
-  useEffect(() => {
-    loadUsers();
-  }, [searchTerm, roleFilter]);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const params: any = { limit: 100 };
       if (searchTerm) params.search = searchTerm;
       if (roleFilter) params.role = roleFilter;
-      
+
       const response = await apiClient.adminGetUsers(params);
       setUsers(response.users);
     } catch (err) {
-      setError('Failed to load users');
+      setError("Failed to load users");
       console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [roleFilter, searchTerm]);
+
+  useEffect(() => {
+    loadUsers();
+  }, [searchTerm, roleFilter, loadUsers]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +57,10 @@ export default function AdminUsers() {
       if (editingUser) {
         await apiClient.adminUpdateUser(editingUser.id, data);
       } else {
-        await apiClient.adminCreateUser({ ...data, password: formData.password });
+        await apiClient.adminCreateUser({
+          ...data,
+          password: formData.password,
+        });
       }
 
       setShowForm(false);
@@ -64,7 +68,7 @@ export default function AdminUsers() {
       resetForm();
       loadUsers();
     } catch (err) {
-      setError('Failed to save user');
+      setError("Failed to save user");
       console.error(err);
     }
   };
@@ -73,7 +77,7 @@ export default function AdminUsers() {
     setEditingUser(user);
     setFormData({
       email: user.email,
-      password: '',
+      password: "",
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
@@ -82,12 +86,12 @@ export default function AdminUsers() {
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('Are you sure you want to delete this user?')) {
+    if (confirm("Are you sure you want to delete this user?")) {
       try {
         await apiClient.adminDeleteUser(id);
         loadUsers();
       } catch (err) {
-        setError('Failed to delete user');
+        setError("Failed to delete user");
         console.error(err);
       }
     }
@@ -95,10 +99,10 @@ export default function AdminUsers() {
 
   const resetForm = () => {
     setFormData({
-      email: '',
-      password: '',
-      firstName: '',
-      lastName: '',
+      email: "",
+      password: "",
+      firstName: "",
+      lastName: "",
       role: Role.USER,
     });
   };
@@ -126,8 +130,13 @@ export default function AdminUsers() {
           <div className="px-4 py-6 sm:px-0">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Users Management</h1>
-                <Link href="/admin" className="text-blue-600 hover:text-blue-800">
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Users Management
+                </h1>
+                <Link
+                  href="/admin"
+                  className="text-blue-600 hover:text-blue-800"
+                >
                   ← Back to Dashboard
                 </Link>
               </div>
@@ -166,7 +175,7 @@ export default function AdminUsers() {
                   </label>
                   <select
                     value={roleFilter}
-                    onChange={(e) => setRoleFilter(e.target.value as Role | '')}
+                    onChange={(e) => setRoleFilter(e.target.value as Role | "")}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="">All Roles</option>
@@ -180,9 +189,12 @@ export default function AdminUsers() {
             {showForm && (
               <div className="bg-white shadow rounded-lg p-6 mb-6">
                 <h2 className="text-xl font-bold mb-4">
-                  {editingUser ? 'Edit User' : 'Add New User'}
+                  {editingUser ? "Edit User" : "Add New User"}
                 </h2>
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form
+                  onSubmit={handleSubmit}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                >
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Email *
@@ -191,7 +203,9 @@ export default function AdminUsers() {
                       type="email"
                       required
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
@@ -205,7 +219,9 @@ export default function AdminUsers() {
                         type="password"
                         required={!editingUser}
                         value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, password: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
                     </div>
@@ -219,7 +235,9 @@ export default function AdminUsers() {
                       type="text"
                       required
                       value={formData.firstName}
-                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, firstName: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
@@ -232,7 +250,9 @@ export default function AdminUsers() {
                       type="text"
                       required
                       value={formData.lastName}
-                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, lastName: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                   </div>
@@ -244,7 +264,12 @@ export default function AdminUsers() {
                     <select
                       required
                       value={formData.role}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value as Role })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          role: e.target.value as Role,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
                       <option value={Role.USER}>User</option>
@@ -257,7 +282,7 @@ export default function AdminUsers() {
                       type="submit"
                       className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md"
                     >
-                      {editingUser ? 'Update' : 'Create'} User
+                      {editingUser ? "Update" : "Create"} User
                     </button>
                     <button
                       type="button"
@@ -300,18 +325,24 @@ export default function AdminUsers() {
                           <div className="text-sm font-medium text-gray-900">
                             {user.firstName} {user.lastName}
                           </div>
-                          <div className="text-sm text-gray-500">ID: {user.id}</div>
+                          <div className="text-sm text-gray-500">
+                            ID: {user.id}
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{user.email}</div>
+                        <div className="text-sm text-gray-900">
+                          {user.email}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          user.role === Role.ADMIN 
-                            ? 'bg-purple-100 text-purple-800' 
-                            : 'bg-green-100 text-green-800'
-                        }`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            user.role === Role.ADMIN
+                              ? "bg-purple-100 text-purple-800"
+                              : "bg-green-100 text-green-800"
+                          }`}
+                        >
                           {user.role}
                         </span>
                       </td>
@@ -336,7 +367,7 @@ export default function AdminUsers() {
                   ))}
                 </tbody>
               </table>
-              
+
               {users.length === 0 && !loading && (
                 <div className="text-center py-8">
                   <p className="text-gray-500">No users found.</p>

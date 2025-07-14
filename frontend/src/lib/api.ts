@@ -146,7 +146,12 @@ class ApiClient {
           if (!retryResponse.ok) {
             throw new Error(`HTTP error! status: ${retryResponse.status}`);
           }
-          return retryResponse.json();
+          // Handle empty response for retry
+          const contentType = retryResponse.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            return retryResponse.json();
+          }
+          return null as T;
         } catch {
           // Refresh failed, redirect to login
           this.logout();
@@ -156,7 +161,12 @@ class ApiClient {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return response.json();
+    // Handle empty response (e.g., 204 No Content for DELETE requests)
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      return response.json();
+    }
+    return null as T;
   }
 
   setToken(token: string) {
@@ -233,6 +243,12 @@ class ApiClient {
     limit?: number;
     search?: string;
     categoryId?: number;
+    subcategoryId?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    isActive?: boolean;
+    sortBy?: string;
+    sortOrder?: "ASC" | "DESC";
   }): Promise<{
     products: Product[];
     total: number;
@@ -245,6 +261,16 @@ class ApiClient {
     if (params?.search) searchParams.append("search", params.search);
     if (params?.categoryId)
       searchParams.append("categoryId", params.categoryId.toString());
+    if (params?.subcategoryId)
+      searchParams.append("subcategoryId", params.subcategoryId.toString());
+    if (params?.minPrice !== undefined)
+      searchParams.append("minPrice", params.minPrice.toString());
+    if (params?.maxPrice !== undefined)
+      searchParams.append("maxPrice", params.maxPrice.toString());
+    if (params?.isActive !== undefined)
+      searchParams.append("isActive", params.isActive.toString());
+    if (params?.sortBy) searchParams.append("sortBy", params.sortBy);
+    if (params?.sortOrder) searchParams.append("sortOrder", params.sortOrder);
 
     const query = searchParams.toString();
     return this.request<{
