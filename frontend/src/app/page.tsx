@@ -73,6 +73,17 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {user && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+            <span className="text-blue-700 font-medium">
+              Logged in as {user.firstName} {user.lastName}
+            </span>
+            <span className="text-blue-600 text-sm">({user.email})</span>
+          </div>
+        </div>
+      )}
       <h1 className="text-3xl font-bold text-gray-800 mb-8">Products</h1>
 
       {products.length === 0 ? (

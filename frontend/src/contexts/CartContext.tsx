@@ -1,7 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { Cart, CartItem, apiClient } from "@/lib/api";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { Cart, apiClient } from "@/lib/api";
 import { useAuth } from "./AuthContext";
 
 interface CartContextType {
@@ -22,27 +28,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
+  const refreshCart = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      const cartData = await apiClient.getCart();
+      setCart(cartData.cart);
+    } catch (error) {
+      console.error("Failed to fetch cart:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (user) {
       refreshCart();
     } else {
       setCart(null);
     }
-  }, [user]);
-
-  const refreshCart = async () => {
-    if (!user) return;
-
-    try {
-      setLoading(true);
-      const cartData = await apiClient.getCart();
-      setCart(cartData);
-    } catch (error) {
-      console.error("Failed to fetch cart:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [refreshCart, user]);
 
   const addToCart = async (productId: number, quantity: number) => {
     try {

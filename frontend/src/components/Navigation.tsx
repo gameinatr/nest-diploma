@@ -36,6 +36,12 @@ export default function Navigation() {
 
             {user ? (
               <>
+                <div className="flex items-center space-x-2 px-3 py-2 bg-green-50 rounded-md border border-green-200">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm text-green-700 font-medium">
+                    Welcome, {user.firstName}
+                  </span>
+                </div>
                 <Link
                   href="/cart"
                   className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium relative"

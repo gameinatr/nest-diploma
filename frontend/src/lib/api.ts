@@ -37,6 +37,7 @@ export interface Cart {
   id: number;
   userId: number;
   items: CartItem[];
+  totalItems: number;
   totalAmount: number;
 }
 
@@ -113,7 +114,7 @@ class ApiClient {
             throw new Error(`HTTP error! status: ${retryResponse.status}`);
           }
           return retryResponse.json();
-        } catch (refreshError) {
+        } catch {
           // Refresh failed, redirect to login
           this.logout();
           throw new Error("Authentication failed");
@@ -169,7 +170,7 @@ class ApiClient {
   async logout(): Promise<void> {
     try {
       await this.request("/auth/logout", { method: "POST" });
-    } catch (error) {
+    } catch {
       // Ignore errors during logout
     } finally {
       this.clearToken();
@@ -226,8 +227,8 @@ class ApiClient {
   }
 
   // Cart endpoints
-  async getCart(): Promise<Cart> {
-    return this.request<Cart>("/cart");
+  async getCart(): Promise<{ cart: Cart }> {
+    return this.request<{ cart: Cart }>("/cart");
   }
 
   async addToCart(data: {
