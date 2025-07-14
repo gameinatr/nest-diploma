@@ -1,7 +1,6 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
-
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./modules/auth/auth.module";
@@ -17,6 +16,7 @@ import { CartItem } from "./modules/cart/entities/cart-item.entity";
 import { Category } from "./modules/categories/entities/category.entity";
 import { Order } from "./modules/orders/entities/order.entity";
 import { OrderItem } from "./modules/orders/entities/order-item.entity";
+import { SimpleCacheModule } from "./modules/simple-cache/simple-cache.module";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,13 +24,14 @@ import { OrderItem } from "./modules/orders/entities/order-item.entity";
     }),
     TypeOrmModule.forRoot({
       type: "postgres",
-      url: 'postgresql://diploma_postgres_user:NTA5DzzxBSZoP48IaxlWuyaO2799xwMB@dpg-d1pra4s9c44c738u6ad0-a.frankfurt-postgres.render.com/diploma_postgres', //process.env.POSTGRESQL_URL,
+      url: "postgresql://diploma_postgres_user:NTA5DzzxBSZoP48IaxlWuyaO2799xwMB@dpg-d1pra4s9c44c738u6ad0-a.frankfurt-postgres.render.com/diploma_postgres", //process.env.POSTGRESQL_URL,
       entities: [User, Product, Cart, CartItem, Category, Order, OrderItem],
       synchronize: true, // Set to false in production
       ssl: {
         rejectUnauthorized: false, // For cloud databases
       },
     }),
+    SimpleCacheModule,
     AuthModule,
     UsersModule,
     ProductsModule,
