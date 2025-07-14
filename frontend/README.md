@@ -128,7 +128,7 @@ src/
 - Complete checkout process with shipping information
 - Order history with status tracking
 - Detailed order views with item breakdown
-- Order status indicators (pending, processing, shipped, delivered)
+- Order status indicators (pending, paid, shipped, cancelled)
 
 ### Responsive Design
 - Mobile-first approach
