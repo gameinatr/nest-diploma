@@ -20,6 +20,11 @@ export interface Category {
   id: number;
   name: string;
   description?: string;
+  parentId?: number;
+  parent?: Category;
+  children?: Category[];
+  isActive?: boolean;
+  sortOrder?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -381,6 +386,9 @@ class ApiClient {
   async adminCreateCategory(data: {
     name: string;
     description?: string;
+    parentId?: number;
+    isActive?: boolean;
+    sortOrder?: number;
   }): Promise<Category> {
     return this.request<Category>("/categories", {
       method: "POST",
@@ -393,6 +401,9 @@ class ApiClient {
     data: {
       name?: string;
       description?: string;
+      parentId?: number;
+      isActive?: boolean;
+      sortOrder?: number;
     }
   ): Promise<Category> {
     return this.request<Category>(`/categories/${id}`, {
