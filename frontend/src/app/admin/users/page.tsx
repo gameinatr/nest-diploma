@@ -33,7 +33,7 @@ export default function AdminUsers() {
       if (roleFilter) params.role = roleFilter;
       
       const response = await apiClient.adminGetUsers(params);
-      setUsers(response.data);
+      setUsers(response.users);
     } catch (err) {
       setError('Failed to load users');
       console.error(err);

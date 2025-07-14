@@ -446,7 +446,7 @@ class ApiClient {
     search?: string;
     role?: Role;
   }): Promise<{
-    data: User[];
+    users: User[];
     total: number;
     page: number;
     limit: number;
@@ -459,7 +459,7 @@ class ApiClient {
 
     const query = searchParams.toString();
     return this.request<{
-      data: User[];
+      users: User[];
       total: number;
       page: number;
       limit: number;
