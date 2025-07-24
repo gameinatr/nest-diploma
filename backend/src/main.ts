@@ -3,6 +3,7 @@ import { ValidationPipe } from "@nestjs/common";
 import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from "./app.module";
+import { GlobalExceptionFilter } from "./common/filters";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,6 +23,9 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
     transform: true,
   }));
+  
+  // Enable global exception filter
+  app.useGlobalFilters(new GlobalExceptionFilter());
   
   const port = process.env.PORT || 3000;
   await app.listen(port);
