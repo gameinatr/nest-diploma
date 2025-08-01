@@ -108,12 +108,12 @@ export default function Home() {
         page: currentPage,
         limit,
         ...(debouncedFilters.search && { search: debouncedFilters.search }),
-        ...(debouncedFilters.categoryId && {
-          categoryId: debouncedFilters.categoryId,
-        }),
-        ...(debouncedFilters.subcategoryId && {
-          subcategoryId: debouncedFilters.subcategoryId,
-        }),
+        // If subcategory is selected, only send subcategoryId (not categoryId)
+        // If only category is selected, send categoryId
+        ...(debouncedFilters.subcategoryId 
+          ? { subcategoryId: debouncedFilters.subcategoryId }
+          : debouncedFilters.categoryId && { categoryId: debouncedFilters.categoryId }
+        ),
         ...(debouncedFilters.minPrice !== null && {
           minPrice: debouncedFilters.minPrice,
         }),
