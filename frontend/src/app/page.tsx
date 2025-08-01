@@ -194,10 +194,14 @@ export default function Home() {
     setCurrentPage(1);
   };
 
-  const selectedCategory = categories.find(
-    (cat) => cat.id === filters.categoryId
-  );
-  const subcategories = selectedCategory?.children || [];
+  // Separate root categories (parentId is null) from subcategories (parentId is not null)
+  const rootCategories = categories.filter(cat => !cat.parentId);
+  const allSubcategories = categories.filter(cat => cat.parentId);
+  
+  // Get subcategories for the selected category
+  const subcategories = filters.categoryId 
+    ? allSubcategories.filter(subcat => subcat.parentId === filters.categoryId)
+    : [];
 
   const totalPages = Math.ceil(totalProducts / limit);
 
@@ -296,7 +300,7 @@ export default function Home() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               >
                 <option value="">All Categories</option>
-                {categories.map((category) => (
+                {rootCategories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
                   </option>
