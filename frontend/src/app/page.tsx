@@ -276,7 +276,7 @@ export default function Home() {
                 value={filters.search}
                 onChange={(e) => handleFilterChange("search", e.target.value)}
                 placeholder="Search products..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black placeholder-gray-500"
               />
             </div>
 
@@ -293,7 +293,7 @@ export default function Home() {
                     e.target.value ? Number(e.target.value) : null
                   )
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               >
                 <option value="">All Categories</option>
                 {categories.map((category) => (
@@ -318,7 +318,7 @@ export default function Home() {
                       e.target.value ? Number(e.target.value) : null
                     )
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                 >
                   <option value="">All Subcategories</option>
                   {subcategories.map((subcategory) => (
@@ -346,7 +346,7 @@ export default function Home() {
                     )
                   }
                   placeholder="Min"
-                  className="w-1/2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-1/2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black placeholder-gray-500"
                 />
                 <input
                   type="number"
@@ -358,7 +358,7 @@ export default function Home() {
                     )
                   }
                   placeholder="Max"
-                  className="w-1/2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-1/2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black placeholder-gray-500"
                 />
               </div>
             </div>
@@ -375,7 +375,7 @@ export default function Home() {
                   handleFilterChange("sortBy", sortBy);
                   handleFilterChange("sortOrder", sortOrder as "ASC" | "DESC");
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               >
                 <option value="title-ASC">Name (A-Z)</option>
                 <option value="title-DESC">Name (Z-A)</option>
