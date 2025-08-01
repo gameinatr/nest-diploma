@@ -33,6 +33,7 @@ export class CategoriesService {
 
   async findAll(): Promise<Category[]> {
     return this.categoryRepository.find({
+      where: { isActive: true },
       relations: ['parent', 'children'],
       order: { sortOrder: 'ASC', name: 'ASC' },
     });
@@ -40,7 +41,7 @@ export class CategoriesService {
 
   async findRootCategories(): Promise<Category[]> {
     return this.categoryRepository.find({
-      where: { parentId: null },
+      where: { parentId: null, isActive: true },
       relations: ['children'],
       order: { sortOrder: 'ASC', name: 'ASC' },
     });
@@ -48,6 +49,7 @@ export class CategoriesService {
 
   async findCategoryTree(): Promise<Category[]> {
     const categories = await this.categoryRepository.find({
+      where: { isActive: true },
       relations: ['children'],
       order: { sortOrder: 'ASC', name: 'ASC' },
     });
@@ -79,7 +81,7 @@ export class CategoriesService {
 
   async findOne(id: number): Promise<Category> {
     const category = await this.categoryRepository.findOne({
-      where: { id },
+      where: { id, isActive: true },
       relations: ['parent', 'children'],
     });
 
@@ -94,7 +96,7 @@ export class CategoriesService {
     const parentCategory = await this.findOne(parentId);
     
     return this.categoryRepository.find({
-      where: { parentId },
+      where: { parentId, isActive: true },
       order: { sortOrder: 'ASC', name: 'ASC' },
     });
   }
@@ -129,15 +131,28 @@ export class CategoriesService {
   }
 
   async remove(id: number): Promise<void> {
-    const category = await this.findOne(id);
+    const category = await this.categoryRepository.findOne({
+      where: { id },
+      relations: ['parent', 'children'],
+    });
 
-    // Check if category has children
-    const childrenCount = await this.categoryRepository.count({ where: { parentId: id } });
-    if (childrenCount > 0) {
-      throw new BadRequestException('Cannot delete category that has subcategories');
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
     }
 
-    await this.categoryRepository.remove(category);
+    // Check if category has active children
+    const activeChildrenCount = await this.categoryRepository.count({ 
+      where: { parentId: id, isActive: true } 
+    });
+    if (activeChildrenCount > 0) {
+      throw new BadRequestException('Cannot delete category that has active subcategories');
+    }
+
+    // Soft delete: set isActive to false instead of removing
+    category.isActive = false;
+    await this.categoryRepository.save(category);
+    
+    console.log(`✅ Category ${id} soft deleted successfully`);
   }
 
   private async wouldCreateCircularReference(categoryId: number, newParentId: number): Promise<boolean> {

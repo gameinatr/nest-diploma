@@ -75,6 +75,14 @@ export class ProductsService {
       .leftJoinAndSelect("product.category", "category")
       .leftJoinAndSelect("product.subcategory", "subcategory");
 
+    // Always filter out soft-deleted products unless explicitly requested
+    if (isActive !== undefined) {
+      queryBuilder.andWhere("product.isActive = :isActive", { isActive });
+    } else {
+      // Default to showing only active products
+      queryBuilder.andWhere("product.isActive = :isActive", { isActive: true });
+    }
+
     // Apply filters
     if (categoryId) {
       queryBuilder.andWhere("product.categoryId = :categoryId", { categoryId });
@@ -104,10 +112,6 @@ export class ProductsService {
       queryBuilder.andWhere("product.price <= :maxPrice", { maxPrice });
     }
 
-    if (isActive !== undefined) {
-      queryBuilder.andWhere("product.isActive = :isActive", { isActive });
-    }
-
     // Apply sorting
     queryBuilder.orderBy(`product.${sortBy}`, sortOrder);
 
@@ -131,14 +135,14 @@ export class ProductsService {
   async findOne(id: number): Promise<Product> {
     // Try to get product from cache first
     const simpleCachedProduct = await this.simpleCacheService.get(id);
-    if (simpleCachedProduct) {
+    if (simpleCachedProduct && simpleCachedProduct.isActive) {
       return simpleCachedProduct;
     }
 
     // If not in cache, fetch from database
     console.log(`💾 Fetching product ${id} from database`);
     const product = await this.productRepository.findOne({
-      where: { id },
+      where: { id, isActive: true },
       relations: ["category", "subcategory"],
     });
 
@@ -212,7 +216,7 @@ export class ProductsService {
   async remove(id: number): Promise<void> {
     // Clear cache before removing
     await this.simpleCacheService.delete(id);
-    console.log(`🗑️ Removing product ${id} - cache cleared`);
+    console.log(`🗑️ Soft deleting product ${id} - cache cleared`);
 
     const product = await this.productRepository.findOne({
       where: { id },
@@ -223,6 +227,10 @@ export class ProductsService {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
-    await this.productRepository.remove(product);
+    // Soft delete: set isActive to false instead of removing
+    product.isActive = false;
+    await this.productRepository.save(product);
+    
+    console.log(`✅ Product ${id} soft deleted successfully`);
   }
 }

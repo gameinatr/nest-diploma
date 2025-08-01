@@ -46,6 +46,9 @@ export class Order {
   @Column({ nullable: true })
   notes: string;
 
+  @Column({ default: true })
+  isActive: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

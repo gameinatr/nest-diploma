@@ -41,31 +41,33 @@ export class AuthService {
     access_token: string;
     refresh_token: string;
   }> {
-    try {
-      // Generate tokens
-      const user = await this.usersService.findByEmail(loginDto.email);
-      const isPasswordCorrect = await this.usersService.verifyPassword(
-        user,
-        loginDto.password
-      );
-
-      if (!isPasswordCorrect) {
-        throw new UnauthorizedException("Invalid credentials");
-      }
-
-      const tokens = this.generateTokens(user);
-
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = user;
-
-      return {
-        user: userWithoutPassword,
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-      };
-    } catch (error) {
-      throw new UnauthorizedException("Login failed due to unknown reason");
+    // Find user by email
+    const user = await this.usersService.findByEmail(loginDto.email);
+    
+    if (!user) {
+      throw new UnauthorizedException("Invalid credentials");
     }
+
+    // Verify password
+    const isPasswordCorrect = await this.usersService.verifyPassword(
+      user,
+      loginDto.password
+    );
+
+    if (!isPasswordCorrect) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
+
+    const tokens = this.generateTokens(user);
+
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user;
+
+    return {
+      user: userWithoutPassword,
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+    };
   }
 
   async refreshToken(

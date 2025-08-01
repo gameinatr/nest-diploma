@@ -75,7 +75,8 @@ export class OrdersService {
     const queryBuilder = this.orderRepository.createQueryBuilder('order')
       .leftJoinAndSelect('order.items', 'items')
       .leftJoinAndSelect('items.product', 'product')
-      .where('order.userId = :userId', { userId });
+      .where('order.userId = :userId', { userId })
+      .andWhere('order.isActive = :isActive', { isActive: true });
 
     if (status) {
       queryBuilder.andWhere('order.status = :status', { status });
@@ -122,10 +123,11 @@ export class OrdersService {
     const queryBuilder = this.orderRepository.createQueryBuilder('order')
       .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.items', 'items')
-      .leftJoinAndSelect('items.product', 'product');
+      .leftJoinAndSelect('items.product', 'product')
+      .where('order.isActive = :isActive', { isActive: true });
 
     if (status) {
-      queryBuilder.where('order.status = :status', { status });
+      queryBuilder.andWhere('order.status = :status', { status });
     }
 
     // Apply sorting (newest first)
@@ -159,7 +161,8 @@ export class OrdersService {
       .leftJoinAndSelect('order.items', 'items')
       .leftJoinAndSelect('items.product', 'product')
       .leftJoinAndSelect('order.user', 'user')
-      .where('order.id = :id', { id });
+      .where('order.id = :id', { id })
+      .andWhere('order.isActive = :isActive', { isActive: true });
 
     if (userId) {
       queryBuilder.andWhere('order.userId = :userId', { userId });
@@ -198,14 +201,33 @@ export class OrdersService {
   }
 
   async remove(id: number, userId?: number): Promise<void> {
-    const order = await this.findOne(id, userId);
+    // Find order without isActive filter for deletion
+    const queryBuilder = this.orderRepository.createQueryBuilder('order')
+      .leftJoinAndSelect('order.items', 'items')
+      .leftJoinAndSelect('items.product', 'product')
+      .leftJoinAndSelect('order.user', 'user')
+      .where('order.id = :id', { id });
+
+    if (userId) {
+      queryBuilder.andWhere('order.userId = :userId', { userId });
+    }
+
+    const order = await queryBuilder.getOne();
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
     
     // Only allow deletion of pending or cancelled orders
     if (order.status !== OrderStatus.PENDING && order.status !== OrderStatus.CANCELLED) {
       throw new BadRequestException('Can only delete pending or cancelled orders');
     }
 
-    await this.orderRepository.remove(order);
+    // Soft delete: set isActive to false instead of removing
+    order.isActive = false;
+    await this.orderRepository.save(order);
+    
+    console.log(`✅ Order ${id} soft deleted successfully`);
   }
 
   private isValidStatusTransition(currentStatus: OrderStatus, newStatus: OrderStatus): boolean {

@@ -21,36 +21,36 @@ import { RegisterDto } from "./dto/register.dto";
 import { RefreshJwtAuthGuard } from "./guards/refresh-jwt-auth.guard";
 import { LoginDto } from "./dto/login.dto";
 
-@ApiTags('Authentication')
+@ApiTags("Authentication")
 @Controller("auth")
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post("register")
-  @ApiOperation({ summary: 'Register a new user' })
+  @ApiOperation({ summary: "Register a new user" })
   @ApiBody({ type: RegisterDto })
-  @ApiResponse({ 
-    status: 201, 
-    description: 'User successfully registered',
+  @ApiResponse({
+    status: 201,
+    description: "User successfully registered",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
         user: {
-          type: 'object',
+          type: "object",
           properties: {
-            id: { type: 'number' },
-            email: { type: 'string' },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            role: { type: 'string' }
-          }
+            id: { type: "number" },
+            email: { type: "string" },
+            firstName: { type: "string" },
+            lastName: { type: "string" },
+            role: { type: "string" },
+          },
         },
-        access_token: { type: 'string' }
-      }
-    }
+        access_token: { type: "string" },
+      },
+    },
   })
-  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
-  @ApiResponse({ status: 409, description: 'User already exists' })
+  @ApiResponse({ status: 400, description: "Bad request - validation failed" })
+  @ApiResponse({ status: 409, description: "User already exists" })
   async register(
     @Body() registerDto: RegisterDto,
     @Response() res: ExpressResponse
@@ -73,33 +73,30 @@ export class AuthController {
   }
 
   @Post("login")
-  @ApiOperation({ summary: 'Login user' })
+  @ApiOperation({ summary: "Login user" })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'User successfully logged in',
+  @ApiResponse({
+    status: 200,
+    description: "User successfully logged in",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
         user: {
-          type: 'object',
+          type: "object",
           properties: {
-            id: { type: 'number' },
-            email: { type: 'string' },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            role: { type: 'string' }
-          }
+            id: { type: "number" },
+            email: { type: "string" },
+            firstName: { type: "string" },
+            lastName: { type: "string" },
+            role: { type: "string" },
+          },
         },
-        access_token: { type: 'string' }
-      }
-    }
+        access_token: { type: "string" },
+      },
+    },
   })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(
-    @Body() loginDto: LoginDto,
-    @Response() res: ExpressResponse
-  ) {
+  @ApiResponse({ status: 401, description: "Invalid credentials" })
+  async login(@Body() loginDto: LoginDto, @Response() res: ExpressResponse) {
     const result = await this.authService.login(loginDto);
 
     // Set refresh token as HTTP-only cookie
@@ -119,19 +116,19 @@ export class AuthController {
 
   @UseGuards(RefreshJwtAuthGuard)
   @Post("refresh")
-  @ApiOperation({ summary: 'Refresh access token' })
-  @ApiCookieAuth('access_token')
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Token successfully refreshed',
+  @ApiOperation({ summary: "Refresh access token" })
+  @ApiCookieAuth("access_token")
+  @ApiResponse({
+    status: 200,
+    description: "Token successfully refreshed",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        access_token: { type: 'string' }
-      }
-    }
+        access_token: { type: "string" },
+      },
+    },
   })
-  @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
+  @ApiResponse({ status: 401, description: "Invalid or expired refresh token" })
   async refresh(@Request() req) {
     const refreshToken = req.cookies?.refresh_token;
     if (!refreshToken) {
@@ -142,16 +139,16 @@ export class AuthController {
   }
 
   @Post("logout")
-  @ApiOperation({ summary: 'Logout user' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'User successfully logged out',
+  @ApiOperation({ summary: "Logout user" })
+  @ApiResponse({
+    status: 200,
+    description: "User successfully logged out",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        message: { type: 'string', example: 'Logged out successfully' }
-      }
-    }
+        message: { type: "string", example: "Logged out successfully" },
+      },
+    },
   })
   async logout(@Response() res: ExpressResponse) {
     res.clearCookie("refresh_token");

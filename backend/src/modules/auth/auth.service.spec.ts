@@ -26,6 +26,7 @@ describe('AuthService', () => {
     firstName: 'John',
     lastName: 'Doe',
     role: Role.USER,
+    isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -36,6 +37,7 @@ describe('AuthService', () => {
     firstName: 'John',
     lastName: 'Doe',
     role: Role.USER,
+    isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

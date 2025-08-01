@@ -59,6 +59,9 @@ export class UsersService {
 
     const queryBuilder = this.userRepository.createQueryBuilder("user");
 
+    // Only show active users by default
+    queryBuilder.andWhere("user.isActive = :isActive", { isActive: true });
+
     // Apply filters
     if (search) {
       queryBuilder.andWhere(
@@ -95,7 +98,9 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<Partial<User>> {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({ 
+      where: { id, isActive: true } 
+    });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -105,11 +110,15 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { email } });
+    return this.userRepository.findOne({ 
+      where: { email, isActive: true } 
+    });
   }
 
   async findById(id: number): Promise<User | null> {
-    return this.userRepository.findOne({ where: { id } });
+    return this.userRepository.findOne({ 
+      where: { id, isActive: true } 
+    });
   }
 
   async update(
@@ -177,6 +186,10 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    await this.userRepository.remove(user);
+    // Soft delete: set isActive to false instead of removing
+    user.isActive = false;
+    await this.userRepository.save(user);
+    
+    console.log(`✅ User ${id} soft deleted successfully`);
   }
 }
